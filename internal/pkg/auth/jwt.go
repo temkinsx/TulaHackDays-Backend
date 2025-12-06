@@ -1,11 +1,10 @@
 package auth
 
 import (
-	"errors"
-	"time"
-
 	"TulaHackDays-Backend/internal/config"
 	"TulaHackDays-Backend/internal/domain"
+	"errors"
+	"time"
 
 	"github.com/golang-jwt/jwt/v5"
 	"github.com/google/uuid"
@@ -47,7 +46,7 @@ func (a *AuthService) GenerateToken(user *domain.User) (string, error) {
 			ExpiresAt: jwt.NewNumericDate(expirationTime),
 			IssuedAt:  jwt.NewNumericDate(time.Now()),
 			NotBefore: jwt.NewNumericDate(time.Now()),
-			Issuer:    "TulaHackDays-Backend",
+			Issuer:    "health-map-backend",
 			Subject:   user.ID.String(),
 		},
 	}
