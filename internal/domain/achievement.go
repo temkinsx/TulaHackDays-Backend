@@ -31,79 +31,10 @@ type UserAchievement struct {
 	UnlockedAt    time.Time `json:"unlocked_at"`
 }
 
-type AchievementType string
-
-const (
-	AchievementTypeFirstReview    AchievementType = "first_review"
-	AchievementTypeReviewMaster   AchievementType = "review_master"
-	AchievementTypePlaceCreator   AchievementType = "place_creator"
-	AchievementTypeCommenter      AchievementType = "commenter"
-	AchievementTypePhotographer   AchievementType = "photographer"
-	AchievementTypeHealthAdvocate AchievementType = "health_advocate"
-)
-
-// Predefined achievements
-var DefaultAchievements = []*Achievement{
-	{
-		Name:        "Первый отзыв",
-		Description: "Оставьте свой первый отзыв",
-		Icon:        "⭐",
-		Points:      10,
-		Type:        string(AchievementTypeFirstReview),
-		Condition:   `{"reviews_count": 1}`,
-		IsActive:    true,
-	},
-	{
-		Name:        "Мастер отзывов",
-		Description: "Оставьте 50 отзывов",
-		Icon:        "🏆",
-		Points:      100,
-		Type:        string(AchievementTypeReviewMaster),
-		Condition:   `{"reviews_count": 50}`,
-		IsActive:    true,
-	},
-	{
-		Name:        "Создатель мест",
-		Description: "Добавьте 10 новых объектов",
-		Icon:        "📍",
-		Points:      150,
-		Type:        string(AchievementTypePlaceCreator),
-		Condition:   `{"places_count": 10}`,
-		IsActive:    true,
-	},
-	{
-		Name:        "Комментатор",
-		Description: "Оставьте 20 комментариев",
-		Icon:        "💬",
-		Points:      50,
-		Type:        string(AchievementTypeCommenter),
-		Condition:   `{"comments_count": 20}`,
-		IsActive:    true,
-	},
-	{
-		Name:        "Фотограф",
-		Description: "Добавьте 25 фотографий",
-		Icon:        "📸",
-		Points:      75,
-		Type:        string(AchievementTypePhotographer),
-		Condition:   `{"photos_count": 25}`,
-		IsActive:    true,
-	},
-	{
-		Name:        "Защитник здоровья",
-		Description: "Получите 500 очков",
-		Icon:        "❤️",
-		Points:      200,
-		Type:        string(AchievementTypeHealthAdvocate),
-		Condition:   `{"points": 500}`,
-		IsActive:    true,
-	},
-}
-
 type AchievementRepository interface {
 	Create(ctx context.Context, achievement *Achievement) error
 	GetByID(ctx context.Context, id uint) (*Achievement, error)
-	ListAllActive(ctx context.Context) ([]*Achievement, error)
+	ListActive(ctx context.Context) ([]*Achievement, error)
 	Update(ctx context.Context, achievement *Achievement) error
 
 	// User achievements
@@ -116,13 +47,14 @@ type AchievementRepository interface {
 }
 
 type AchievementService interface {
-	GetActive(ctx context.Context) ([]*Achievement, error)
+	ListActive(ctx context.Context) ([]*Achievement, error)
 	GrantIfEligible(ctx context.Context, userID uuid.UUID, event AchievementEvent) error
 	GetUserAchievements(ctx context.Context, userID uuid.UUID) ([]*UserAchievement, error)
 }
 
+// AchievementEvent описывает внешнее событие (например, набор очков или количество отзывов),
+// на основе которого сервис решает, пора ли выдавать достижение.
 type AchievementEvent struct {
-	Type   AchievementType
-	Points int
-	Count  int
+	Type  string
+	Stats map[string]int
 }

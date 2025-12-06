@@ -83,6 +83,5 @@ type UserService interface {
 	UpdateProfile(ctx context.Context, userID uuid.UUID, input *UpdateProfileInput) (*User, error)
 	ChangePassword(ctx context.Context, userID uuid.UUID, input *ChangePasswordInput) error
 	GetLeaderboard(ctx context.Context, limit int) ([]*User, error)
-	GetAchievements(ctx context.Context, userID uuid.UUID) ([]*UserAchievement, error)
 	AddPoints(ctx context.Context, userID uuid.UUID, points int) (int, error)
 }
