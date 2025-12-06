@@ -103,7 +103,7 @@ var DefaultAchievements = []*Achievement{
 type AchievementRepository interface {
 	Create(ctx context.Context, achievement *Achievement) error
 	GetByID(ctx context.Context, id uint) (*Achievement, error)
-	GetAllActive(ctx context.Context) ([]*Achievement, error)
+	ListAllActive(ctx context.Context) ([]*Achievement, error)
 	Update(ctx context.Context, achievement *Achievement) error
 
 	// User achievements

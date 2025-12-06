@@ -41,6 +41,7 @@ type UserRepository interface {
 	GetByEmail(ctx context.Context, email string) (*User, error)
 	GetByUsername(ctx context.Context, username string) (*User, error)
 	Update(ctx context.Context, user *User) (*User, error)
+	AddPoints(ctx context.Context, userID uuid.UUID, points int) (int, error)
 	Delete(ctx context.Context, id uuid.UUID) error
 	GetLeaderboard(ctx context.Context, limit int) ([]*User, error)
 	ExistsByEmailOrUsername(ctx context.Context, email, username string) (bool, error)
@@ -76,12 +77,12 @@ type LoginResult struct {
 }
 
 type UserService interface {
-	Register(ctx context.Context, input *RegisterUserInput) (*User, error)
+	Register(ctx context.Context, input *RegisterUserInput) (*LoginResult, error)
 	Login(ctx context.Context, input *LoginUserInput) (*LoginResult, error)
 	GetProfile(ctx context.Context, userID uuid.UUID) (*User, error)
 	UpdateProfile(ctx context.Context, userID uuid.UUID, input *UpdateProfileInput) (*User, error)
 	ChangePassword(ctx context.Context, userID uuid.UUID, input *ChangePasswordInput) error
 	GetLeaderboard(ctx context.Context, limit int) ([]*User, error)
 	GetAchievements(ctx context.Context, userID uuid.UUID) ([]*UserAchievement, error)
-	AddPoints(ctx context.Context, userID uuid.UUID, points int) error
+	AddPoints(ctx context.Context, userID uuid.UUID, points int) (int, error)
 }
