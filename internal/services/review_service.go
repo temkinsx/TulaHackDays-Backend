@@ -20,7 +20,7 @@ func NewReviewService(reviewRepo domain.ReviewRepository, txManager domain.TxMan
 	}
 }
 
-func (s *reviewService) CreateReview(ctx context.Context, userID uuid.UUID, input *domain.CreateReviewInput) (*domain.Review, error) {
+func (s *reviewService) Create(ctx context.Context, userID uuid.UUID, input *domain.CreateReviewInput) (*domain.Review, error) {
 	var createdReview *domain.Review
 
 	err := s.txManager.WithinTx(ctx, func(ctx context.Context, repos *domain.Repos) error {
@@ -84,11 +84,11 @@ func (s *reviewService) CreateReview(ctx context.Context, userID uuid.UUID, inpu
 	return createdReview, err
 }
 
-func (s *reviewService) GetReview(ctx context.Context, reviewID uint) (*domain.Review, error) {
+func (s *reviewService) GetByID(ctx context.Context, reviewID uint) (*domain.Review, error) {
 	return s.reviewRepo.GetByID(ctx, reviewID)
 }
 
-func (s *reviewService) UpdateReview(ctx context.Context, reviewID uint, userID uuid.UUID, input *domain.UpdateReviewInput) (*domain.Review, error) {
+func (s *reviewService) Update(ctx context.Context, reviewID uint, userID uuid.UUID, input *domain.UpdateReviewInput) (*domain.Review, error) {
 	var updatedReview *domain.Review
 
 	err := s.txManager.WithinTx(ctx, func(ctx context.Context, repos *domain.Repos) error {
@@ -159,7 +159,7 @@ func (s *reviewService) UpdateReview(ctx context.Context, reviewID uint, userID 
 	return updatedReview, err
 }
 
-func (s *reviewService) DeleteReview(ctx context.Context, reviewID uint, userID uuid.UUID) error {
+func (s *reviewService) Delete(ctx context.Context, reviewID uint, userID uuid.UUID) error {
 	return s.txManager.WithinTx(ctx, func(ctx context.Context, repos *domain.Repos) error {
 		repos.Review = s.reviewRepo
 
@@ -178,7 +178,7 @@ func (s *reviewService) DeleteReview(ctx context.Context, reviewID uint, userID 
 	})
 }
 
-func (s *reviewService) GetReviewsByPlace(ctx context.Context, placeID uuid.UUID, params *domain.ListParams) (*domain.ReviewsResult, error) {
+func (s *reviewService) ListByPlace(ctx context.Context, placeID uuid.UUID, params *domain.ListParams) (*domain.ReviewsResult, error) {
 	reviews, total, err := s.reviewRepo.GetByPlaceID(ctx, placeID, params.Limit, params.Offset)
 	if err != nil {
 		return nil, err
@@ -192,7 +192,7 @@ func (s *reviewService) GetReviewsByPlace(ctx context.Context, placeID uuid.UUID
 	}, nil
 }
 
-func (s *reviewService) GetReviewsByUser(ctx context.Context, userID uuid.UUID, params *domain.ListParams) (*domain.ReviewsResult, error) {
+func (s *reviewService) ListByUser(ctx context.Context, userID uuid.UUID, params *domain.ListParams) (*domain.ReviewsResult, error) {
 	reviews, total, err := s.reviewRepo.GetByUserID(ctx, userID, params.Limit, params.Offset)
 	if err != nil {
 		return nil, err
@@ -212,10 +212,10 @@ func (s *reviewService) AddComment(ctx context.Context, reviewID uint, userID uu
 	}
 
 	comment := &domain.Comment{
-		ReviewID:  reviewID,
-		UserID:    userID,
-		Content:   content,
-		IsActive:  true,
+		ReviewID: reviewID,
+		UserID:   userID,
+		Content:  content,
+		IsActive: true,
 	}
 
 	err := s.reviewRepo.CreateComment(ctx, comment)
@@ -226,7 +226,7 @@ func (s *reviewService) AddComment(ctx context.Context, reviewID uint, userID uu
 	return comment, nil
 }
 
-func (s *reviewService) GetCommentsByReview(ctx context.Context, reviewID uint, params *domain.ListParams) (*domain.CommentsResult, error) {
+func (s *reviewService) ListComments(ctx context.Context, reviewID uint, params *domain.ListParams) (*domain.CommentsResult, error) {
 	comments, total, err := s.reviewRepo.GetCommentsByReviewID(ctx, reviewID, params.Limit, params.Offset)
 	if err != nil {
 		return nil, err
