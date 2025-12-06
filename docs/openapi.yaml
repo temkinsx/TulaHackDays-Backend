@@ -12,6 +12,13 @@ components:
       type: http
       scheme: bearer
       bearerFormat: JWT
+  responses:
+    ErrorResponse:
+      description: Error response
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
 
   schemas:
     ErrorResponse:
@@ -102,6 +109,19 @@ components:
           type: string
         new_password:
           type: string
+    UserAchievement:
+      type: object
+      properties:
+        id:
+          type: integer
+        user_id:
+          type: string
+          format: uuid
+        achievement_id:
+          type: integer
+        unlocked_at:
+          type: string
+          format: date-time
 
     Place:
       type: object
@@ -307,6 +327,8 @@ paths:
       responses:
         '200':
           description: OK
+        default:
+          $ref: '#/components/responses/ErrorResponse'
 
   /auth/register:
     post:
@@ -330,6 +352,8 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
+        default:
+          $ref: '#/components/responses/ErrorResponse'
 
   /auth/login:
     post:
@@ -353,6 +377,8 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
+        default:
+          $ref: '#/components/responses/ErrorResponse'
 
   /users/leaderboard:
     get:
@@ -373,6 +399,8 @@ paths:
                 type: array
                 items:
                   $ref: '#/components/schemas/User'
+        default:
+          $ref: '#/components/responses/ErrorResponse'
 
   /users/profile:
     get:
@@ -391,6 +419,8 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
+        default:
+          $ref: '#/components/responses/ErrorResponse'
     put:
       security: [{ BearerAuth: [] }]
       summary: Update profile
@@ -407,6 +437,8 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/User'
+        default:
+          $ref: '#/components/responses/ErrorResponse'
 
   /users/change-password:
     post:
@@ -425,6 +457,8 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/SuccessResponse'
+        default:
+          $ref: '#/components/responses/ErrorResponse'
 
   /users/achievements:
     get:
@@ -433,6 +467,14 @@ paths:
       responses:
         '200':
           description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/UserAchievement'
+        default:
+          $ref: '#/components/responses/ErrorResponse'
 
   /places/search:
     get:
@@ -473,6 +515,8 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/PlacesResponse'
+        default:
+          $ref: '#/components/responses/ErrorResponse'
 
   /places/nearby:
     get:
@@ -505,6 +549,8 @@ paths:
                 type: array
                 items:
                   $ref: '#/components/schemas/Place'
+        default:
+          $ref: '#/components/responses/ErrorResponse'
 
   /places/{id}:
     get:
@@ -522,6 +568,8 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Place'
+        default:
+          $ref: '#/components/responses/ErrorResponse'
     put:
       security: [{ BearerAuth: [] }]
       summary: Update place
@@ -544,6 +592,8 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Place'
+        default:
+          $ref: '#/components/responses/ErrorResponse'
     delete:
       security: [{ BearerAuth: [] }]
       summary: Delete place
@@ -560,6 +610,8 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/SuccessResponse'
+        default:
+          $ref: '#/components/responses/ErrorResponse'
 
   /places:
     post:
@@ -578,6 +630,8 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Place'
+        default:
+          $ref: '#/components/responses/ErrorResponse'
 
   /places/{place_id}/reviews:
     get:
@@ -603,6 +657,8 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ReviewsResponse'
+        default:
+          $ref: '#/components/responses/ErrorResponse'
 
   /reviews:
     post:
@@ -621,6 +677,8 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Review'
+        default:
+          $ref: '#/components/responses/ErrorResponse'
 
   /reviews/{id}:
     get:
@@ -638,6 +696,8 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Review'
+        default:
+          $ref: '#/components/responses/ErrorResponse'
     put:
       security: [{ BearerAuth: [] }]
       summary: Update review
@@ -660,6 +720,8 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Review'
+        default:
+          $ref: '#/components/responses/ErrorResponse'
     delete:
       security: [{ BearerAuth: [] }]
       summary: Delete review
@@ -676,6 +738,8 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/SuccessResponse'
+        default:
+          $ref: '#/components/responses/ErrorResponse'
 
   /reviews/{id}/comments:
     get:
@@ -701,6 +765,8 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/CommentsResponse'
+        default:
+          $ref: '#/components/responses/ErrorResponse'
     post:
       security: [{ BearerAuth: [] }]
       summary: Add comment to review
@@ -723,6 +789,8 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Comment'
+        default:
+          $ref: '#/components/responses/ErrorResponse'
 
   /users/{user_id}/reviews:
     get:
@@ -749,3 +817,5 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ReviewsResponse'
+        default:
+          $ref: '#/components/responses/ErrorResponse'
