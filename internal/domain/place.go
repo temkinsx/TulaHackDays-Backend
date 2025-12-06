@@ -86,7 +86,7 @@ type PlaceRepository interface {
 	Delete(ctx context.Context, id uuid.UUID) error
 
 	// Search and filtering
-	Search(ctx context.Context, query string, placeType *PlaceType, limit, offset int) ([]*Place, int, error)
+	Search(ctx context.Context, query string, placeType *PlaceType, coords *Coordinates, radiusKm float64, limit, offset int) ([]*Place, int, error)
 	GetNearby(ctx context.Context, coords *Coordinates, radiusKm float64, limit int) ([]*Place, error)
 
 	// Statistics
