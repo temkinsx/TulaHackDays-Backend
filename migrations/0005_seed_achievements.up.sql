@@ -6,4 +6,5 @@ VALUES ('Первый отзыв', 'Оставьте свой первый от�
        ('Комментатор', 'Оставьте 20 комментариев', '💬', 50, 'commenter', '{"comments_count": 20}', true),
        ('Фотограф', 'Добавьте 25 фотографий', '📸', 75, 'photographer', '{"photos_count": 25}', true),
        ('Защитник здоровья', 'Получите 500 очков', '❤️', 200, 'health_advocate', '{"points": 500}',
-        true) ON CONFLICT (name) DO NOTHING;
+        true)
+ON CONFLICT (name) DO NOTHING;
