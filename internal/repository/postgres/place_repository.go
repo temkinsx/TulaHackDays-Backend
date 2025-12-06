@@ -142,7 +142,6 @@ func (p *placeRepository) Search(ctx context.Context, query string, placeType *d
 		args = append(args, *placeType)
 	}
 
-	// Coordinate filtering
 	if coords != nil && radiusKm > 0 {
 		argCount += 2
 		distanceCondition := ` AND (6371 * acos(cos(radians($` + string(rune('0'+argCount-1)) + `)) * cos(radians(latitude)) * cos(radians(longitude) - radians($` + string(rune('0'+argCount)) + `)) + sin(radians($` + string(rune('0'+argCount-1)) + `)) * sin(radians(latitude)))) < $` + string(rune('0'+argCount+1))
@@ -154,14 +153,12 @@ func (p *placeRepository) Search(ctx context.Context, query string, placeType *d
 	baseQuery += ` ORDER BY created_at DESC LIMIT $` + string(rune('0'+argCount+1)) + ` OFFSET $` + string(rune('0'+argCount+2))
 	args = append(args, limit, offset)
 
-	// Get total count
 	var total int
 	err := p.q.QueryRow(ctx, countQuery, args[:argCount]...).Scan(&total)
 	if err != nil {
 		return nil, 0, err
 	}
 
-	// Get places
 	rows, err := p.q.Query(ctx, baseQuery, args...)
 	if err != nil {
 		return nil, 0, err
