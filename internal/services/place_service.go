@@ -58,18 +58,15 @@ func (s *placeService) Update(ctx context.Context, placeID, userID uuid.UUID, in
 	err := s.txManager.WithinTx(ctx, func(ctx context.Context, repos *domain.Repos) error {
 		repos.Place = s.placeRepo
 
-		// Get existing place
 		place, err := repos.Place.GetByID(ctx, placeID)
 		if err != nil {
 			return err
 		}
 
-		// Check if user is the author
 		if place.CreatedByID != userID {
 			return domain.ErrAccessDenied
 		}
 
-		// Apply updates
 		if input.Name != nil {
 			place.Name = *input.Name
 		}
@@ -95,12 +92,10 @@ func (s *placeService) Update(ctx context.Context, placeID, userID uuid.UUID, in
 			place.Images = *input.Images
 		}
 
-		// Validate updated place
 		if err := place.Validate(); err != nil {
 			return err
 		}
 
-		// Update in repository
 		if err := repos.Place.Update(ctx, place); err != nil {
 			return err
 		}
@@ -116,13 +111,11 @@ func (s *placeService) Delete(ctx context.Context, placeID, userID uuid.UUID) er
 	return s.txManager.WithinTx(ctx, func(ctx context.Context, repos *domain.Repos) error {
 		repos.Place = s.placeRepo
 
-		// Get existing place to check ownership
 		place, err := repos.Place.GetByID(ctx, placeID)
 		if err != nil {
 			return err
 		}
 
-		// Check if user is the author
 		if place.CreatedByID != userID {
 			return domain.ErrAccessDenied
 		}
