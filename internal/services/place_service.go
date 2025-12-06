@@ -20,22 +20,22 @@ func NewPlaceService(placeRepo domain.PlaceRepository, txManager domain.TxManage
 	}
 }
 
-func (s *placeService) CreatePlace(ctx context.Context, userID uuid.UUID, input *domain.CreatePlaceInput) (*domain.Place, error) {
+func (s *placeService) Create(ctx context.Context, userID uuid.UUID, input *domain.CreatePlaceInput) (*domain.Place, error) {
 	place := &domain.Place{
-		ID:          uuid.New(),
-		Name:        input.Name,
-		Description: input.Description,
-		Type:        input.Type,
-		Address:     input.Address,
-		Latitude:    input.Latitude,
-		Longitude:   input.Longitude,
-		Phone:       input.Phone,
-		Website:     input.Website,
-		Images:      input.Images,
+		ID:            uuid.New(),
+		Name:          input.Name,
+		Description:   input.Description,
+		Type:          input.Type,
+		Address:       input.Address,
+		Latitude:      input.Latitude,
+		Longitude:     input.Longitude,
+		Phone:         input.Phone,
+		Website:       input.Website,
+		Images:        input.Images,
 		AverageRating: 0,
 		ReviewCount:   0,
-		IsActive:    true,
-		CreatedByID: userID,
+		IsActive:      true,
+		CreatedByID:   userID,
 	}
 
 	if err := place.Validate(); err != nil {
@@ -48,11 +48,11 @@ func (s *placeService) CreatePlace(ctx context.Context, userID uuid.UUID, input 
 	})
 }
 
-func (s *placeService) GetPlace(ctx context.Context, placeID uuid.UUID) (*domain.Place, error) {
+func (s *placeService) GetByID(ctx context.Context, placeID uuid.UUID) (*domain.Place, error) {
 	return s.placeRepo.GetByID(ctx, placeID)
 }
 
-func (s *placeService) UpdatePlace(ctx context.Context, placeID, userID uuid.UUID, input *domain.UpdatePlaceInput) (*domain.Place, error) {
+func (s *placeService) Update(ctx context.Context, placeID, userID uuid.UUID, input *domain.UpdatePlaceInput) (*domain.Place, error) {
 	var updatedPlace *domain.Place
 
 	err := s.txManager.WithinTx(ctx, func(ctx context.Context, repos *domain.Repos) error {
@@ -112,7 +112,7 @@ func (s *placeService) UpdatePlace(ctx context.Context, placeID, userID uuid.UUI
 	return updatedPlace, err
 }
 
-func (s *placeService) DeletePlace(ctx context.Context, placeID, userID uuid.UUID) error {
+func (s *placeService) Delete(ctx context.Context, placeID, userID uuid.UUID) error {
 	return s.txManager.WithinTx(ctx, func(ctx context.Context, repos *domain.Repos) error {
 		repos.Place = s.placeRepo
 
@@ -131,7 +131,7 @@ func (s *placeService) DeletePlace(ctx context.Context, placeID, userID uuid.UUI
 	})
 }
 
-func (s *placeService) SearchPlaces(ctx context.Context, params *domain.SearchPlacesParams) (*domain.PlacesResult, error) {
+func (s *placeService) Search(ctx context.Context, params *domain.SearchPlacesParams) (*domain.PlacesResult, error) {
 	places, total, err := s.placeRepo.Search(ctx, params.Query, params.Type, params.Limit, params.Offset)
 	if err != nil {
 		return nil, err
@@ -145,7 +145,7 @@ func (s *placeService) SearchPlaces(ctx context.Context, params *domain.SearchPl
 	}, nil
 }
 
-func (s *placeService) GetNearbyPlaces(ctx context.Context, params *domain.NearbyPlacesParams) ([]*domain.Place, error) {
+func (s *placeService) GetNearby(ctx context.Context, params *domain.NearbyPlacesParams) ([]*domain.Place, error) {
 	coords, err := domain.NewCoordinates(params.Latitude, params.Longitude)
 	if err != nil {
 		return nil, err
