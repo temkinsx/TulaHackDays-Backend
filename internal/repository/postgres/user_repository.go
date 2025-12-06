@@ -17,18 +17,38 @@ func NewUserRepository(q Querier) domain.UserRepository {
 	return &userRepository{q: q}
 }
 
-func (u *userRepository) Create(ctx context.Context, user *domain.User) error {
+func (u *userRepository) Create(ctx context.Context, user *domain.User) (*domain.User, error) {
 	const q = `
 		INSERT INTO users (email, username, password, first_name, last_name)
-		VALUES ($1, $2, $3, $4, $5);
+		VALUES ($1, $2, $3, $4, $5)
+		RETURNING id, email, username, password, first_name, last_name, avatar, points, level, is_active, created_at, updated_at;
 	`
 
-	_, err := u.q.Exec(ctx, q, user.Email, user.Username, user.Password, user.FirstName, user.LastName)
-	if err != nil {
-		return err
+	var created domain.User
+	if err := u.q.QueryRow(ctx, q,
+		user.Email,
+		user.Username,
+		user.Password,
+		user.FirstName,
+		user.LastName,
+	).Scan(
+		&created.ID,
+		&created.Email,
+		&created.Username,
+		&created.Password,
+		&created.FirstName,
+		&created.LastName,
+		&created.Avatar,
+		&created.Points,
+		&created.Level,
+		&created.IsActive,
+		&created.CreatedAt,
+		&created.UpdatedAt,
+	); err != nil {
+		return nil, err
 	}
-
-	return nil
+	created.Password = ""
+	return &created, nil
 }
 
 func (u *userRepository) GetByID(ctx context.Context, id uuid.UUID) (*domain.User, error) {
