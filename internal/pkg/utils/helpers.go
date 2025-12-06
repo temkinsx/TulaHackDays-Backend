@@ -1,6 +1,7 @@
 package utils
 
 import (
+	"math"
 	"strconv"
 	"strings"
 )
@@ -69,14 +70,16 @@ func TruncateString(s string, maxLen int) string {
 func CalculateDistance(lat1, lng1, lat2, lng2 float64) float64 {
 	const earthRadius = 6371 // km
 
-	dLat := (lat2 - lat1) * (3.141592653589793 / 180.0)
-	dLng := (lng2 - lng1) * (3.141592653589793 / 180.0)
+	lat1Rad := lat1 * math.Pi / 180.0
+	lat2Rad := lat2 * math.Pi / 180.0
+	dLat := (lat2 - lat1) * math.Pi / 180.0
+	dLng := (lng2 - lng1) * math.Pi / 180.0
 
-	a := (dLat/2)*(dLat/2) +
-		(lat1*3.141592653589793/180.0)*(lat1*3.141592653589793/180.0)*
-			(dLng/2)*(dLng/2)*((dLng/2)*(dLng/2))
+	sinLat := math.Sin(dLat / 2)
+	sinLng := math.Sin(dLng / 2)
 
-	c := 2 * (2 * a).atan2(1-a)
+	a := sinLat*sinLat + math.Cos(lat1Rad)*math.Cos(lat2Rad)*sinLng*sinLng
+	c := 2 * math.Atan2(math.Sqrt(a), math.Sqrt(1-a))
 
 	return earthRadius * c
 }
