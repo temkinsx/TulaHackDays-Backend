@@ -132,7 +132,16 @@ func (s *placeService) Delete(ctx context.Context, placeID, userID uuid.UUID) er
 }
 
 func (s *placeService) Search(ctx context.Context, params *domain.SearchPlacesParams) (*domain.PlacesResult, error) {
-	places, total, err := s.placeRepo.Search(ctx, params.Query, params.Type, params.Limit, params.Offset)
+	var coords *domain.Coordinates
+	if params.Latitude != nil && params.Longitude != nil {
+		var err error
+		coords, err = domain.NewCoordinates(*params.Latitude, *params.Longitude)
+		if err != nil {
+			return nil, err
+		}
+	}
+
+	places, total, err := s.placeRepo.Search(ctx, params.Query, params.Type, coords, params.RadiusKm, params.Limit, params.Offset)
 	if err != nil {
 		return nil, err
 	}

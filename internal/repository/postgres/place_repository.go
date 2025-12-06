@@ -111,7 +111,7 @@ func (p *placeRepository) Delete(ctx context.Context, id uuid.UUID) error {
 	return nil
 }
 
-func (p *placeRepository) Search(ctx context.Context, query string, placeType *domain.PlaceType, limit, offset int) ([]*domain.Place, int, error) {
+func (p *placeRepository) Search(ctx context.Context, query string, placeType *domain.PlaceType, coords *domain.Coordinates, radiusKm float64, limit, offset int) ([]*domain.Place, int, error) {
 	var args []interface{}
 	argCount := 0
 
@@ -140,6 +140,15 @@ func (p *placeRepository) Search(ctx context.Context, query string, placeType *d
 		baseQuery += ` AND type = $` + string(rune('0'+argCount))
 		countQuery += ` AND type = $` + string(rune('0'+argCount))
 		args = append(args, *placeType)
+	}
+
+	// Coordinate filtering
+	if coords != nil && radiusKm > 0 {
+		argCount += 2
+		distanceCondition := ` AND (6371 * acos(cos(radians($` + string(rune('0'+argCount-1)) + `)) * cos(radians(latitude)) * cos(radians(longitude) - radians($` + string(rune('0'+argCount)) + `)) + sin(radians($` + string(rune('0'+argCount-1)) + `)) * sin(radians(latitude)))) < $` + string(rune('0'+argCount+1))
+		baseQuery += distanceCondition
+		countQuery += distanceCondition
+		args = append(args, coords.Latitude, coords.Longitude, radiusKm)
 	}
 
 	baseQuery += ` ORDER BY created_at DESC LIMIT $` + string(rune('0'+argCount+1)) + ` OFFSET $` + string(rune('0'+argCount+2))
