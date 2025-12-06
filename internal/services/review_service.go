@@ -10,15 +10,13 @@ import (
 
 type reviewService struct {
 	reviewRepo domain.ReviewRepository
-	placeSvc   domain.PlaceService
-	userSvc    domain.UserService
+	txManager  domain.TxManager
 }
 
-func NewReviewService(reviewRepo domain.ReviewRepository, placeSvc domain.PlaceService, userSvc domain.UserService) domain.ReviewService {
+func NewReviewService(reviewRepo domain.ReviewRepository, txManager domain.TxManager) domain.PlaceService {
 	return &reviewService{
 		reviewRepo: reviewRepo,
-		placeSvc:   placeSvc,
-		userSvc:    userSvc,
+		txManager:  txManager,
 	}
 }
 

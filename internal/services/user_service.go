@@ -4,22 +4,19 @@ import (
 	"context"
 
 	"TulaHackDays-Backend/internal/domain"
-	"TulaHackDays-Backend/internal/pkg/auth"
 
 	"github.com/google/uuid"
 )
 
 type userService struct {
-	userRepo        domain.UserRepository
-	achievementRepo domain.AchievementRepository
-	authService     *auth.AuthService
+	userRepo  domain.UserRepository
+	txManager domain.TxManager
 }
 
-func NewuserService(userRepo domain.UserRepository, achievementRepo domain.AchievementRepository, authService *auth.AuthService) domain.UserService {
+func NewUserService(userRepo domain.UserRepository, txManager domain.TxManager) domain.UserService {
 	return &userService{
-		userRepo:        userRepo,
-		achievementRepo: achievementRepo,
-		authService:     authService,
+		userRepo:  userRepo,
+		txManager: txManager,
 	}
 }
 

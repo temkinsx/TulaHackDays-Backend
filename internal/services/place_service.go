@@ -10,13 +10,13 @@ import (
 
 type placeService struct {
 	placeRepo domain.PlaceRepository
-	userSvc   domain.UserService
+	txManager domain.TxManager
 }
 
-func NewPlaceService(placeRepo domain.PlaceRepository, userSvc domain.UserService) domain.PlaceService {
+func NewPlaceService(placeRepo domain.PlaceRepository, txManager domain.TxManager) domain.PlaceService {
 	return &placeService{
 		placeRepo: placeRepo,
-		userSvc:   userSvc,
+		txManager: txManager,
 	}
 }
 
