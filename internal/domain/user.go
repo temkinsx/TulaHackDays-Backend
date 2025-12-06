@@ -14,7 +14,7 @@ type User struct {
 	Password  string    `json:"-"` // Never return password in JSON
 	FirstName string    `json:"first_name"`
 	LastName  string    `json:"last_name"`
-	Avatar    string    `json:"avatar"`
+	Avatar    []byte    `json:"avatar"`
 	Points    int       `json:"points"`
 	Level     int       `json:"level"`
 	IsActive  bool      `json:"is_active"`
@@ -62,7 +62,7 @@ type LoginUserInput struct {
 type UpdateProfileInput struct {
 	FirstName string
 	LastName  string
-	Avatar    string
+	Avatar    []byte
 }
 
 type ChangePasswordInput struct {
