@@ -26,7 +26,6 @@ func (s *reviewService) Create(ctx context.Context, userID uuid.UUID, input *dom
 	err := s.txManager.WithinTx(ctx, func(ctx context.Context, repos *domain.Repos) error {
 		repos.Review = s.reviewRepo
 
-		// Check if user already reviewed this place
 		exists, err := repos.Review.ExistsByUserAndPlace(ctx, userID, input.PlaceID)
 		if err != nil {
 			return err
@@ -35,7 +34,6 @@ func (s *reviewService) Create(ctx context.Context, userID uuid.UUID, input *dom
 			return domain.ErrUserAlreadyReviewed
 		}
 
-		// Create review
 		review := &domain.Review{
 			PlaceID:  input.PlaceID,
 			UserID:   userID,
@@ -54,7 +52,6 @@ func (s *reviewService) Create(ctx context.Context, userID uuid.UUID, input *dom
 			return err
 		}
 
-		// Create detailed rating if provided
 		if input.Cleanliness > 0 && input.Service > 0 && input.Quality > 0 && input.Value > 0 {
 			overall := (input.Cleanliness + input.Service + input.Quality + input.Value) / 4
 			rating := &domain.PlaceRating{
@@ -71,7 +68,6 @@ func (s *reviewService) Create(ctx context.Context, userID uuid.UUID, input *dom
 				return err
 			}
 
-			// Update place rating stats
 			if err := repos.Review.UpdatePlaceRatingStats(ctx, input.PlaceID); err != nil {
 				return err
 			}
@@ -94,18 +90,15 @@ func (s *reviewService) Update(ctx context.Context, reviewID uint, userID uuid.U
 	err := s.txManager.WithinTx(ctx, func(ctx context.Context, repos *domain.Repos) error {
 		repos.Review = s.reviewRepo
 
-		// Get existing review
 		review, err := repos.Review.GetByID(ctx, reviewID)
 		if err != nil {
 			return err
 		}
 
-		// Check if user is the author
 		if review.UserID != userID {
 			return domain.ErrAccessDenied
 		}
 
-		// Apply updates
 		if input.Title != nil {
 			review.Title = *input.Title
 		}
@@ -119,17 +112,14 @@ func (s *reviewService) Update(ctx context.Context, reviewID uint, userID uuid.U
 			review.Images = *input.Images
 		}
 
-		// Validate updated review
 		if err := review.Validate(); err != nil {
 			return err
 		}
 
-		// Update in repository
 		if err := repos.Review.Update(ctx, review); err != nil {
 			return err
 		}
 
-		// Update detailed rating if provided
 		if input.Cleanliness != nil && input.Service != nil && input.Quality != nil && input.Value != nil {
 			overall := (*input.Cleanliness + *input.Service + *input.Quality + *input.Value) / 4
 			rating := &domain.PlaceRating{
@@ -146,7 +136,6 @@ func (s *reviewService) Update(ctx context.Context, reviewID uint, userID uuid.U
 				return err
 			}
 
-			// Update place rating stats
 			if err := repos.Review.UpdatePlaceRatingStats(ctx, review.PlaceID); err != nil {
 				return err
 			}
@@ -163,13 +152,11 @@ func (s *reviewService) Delete(ctx context.Context, reviewID uint, userID uuid.U
 	return s.txManager.WithinTx(ctx, func(ctx context.Context, repos *domain.Repos) error {
 		repos.Review = s.reviewRepo
 
-		// Get existing review to check ownership
 		review, err := repos.Review.GetByID(ctx, reviewID)
 		if err != nil {
 			return err
 		}
 
-		// Check if user is the author
 		if review.UserID != userID {
 			return domain.ErrAccessDenied
 		}
