@@ -17,8 +17,8 @@ type UserHandler struct {
 	achievementService domain.AchievementService
 }
 
-func NewUserHandler(userSvc domain.UserService) *UserHandler {
-	return &UserHandler{userService: userSvc}
+func NewUserHandler(userSvc domain.UserService, achievementService domain.AchievementService) *UserHandler {
+	return &UserHandler{userService: userSvc, achievementService: achievementService}
 }
 
 func (h *UserHandler) Register(c *gin.Context) {
