@@ -21,25 +21,135 @@ func NewPlaceService(placeRepo domain.PlaceRepository, txManager domain.TxManage
 }
 
 func (s *placeService) CreatePlace(ctx context.Context, userID uuid.UUID, input *domain.CreatePlaceInput) (*domain.Place, error) {
-	panic("not implemented")
+	place := &domain.Place{
+		ID:          uuid.New(),
+		Name:        input.Name,
+		Description: input.Description,
+		Type:        input.Type,
+		Address:     input.Address,
+		Latitude:    input.Latitude,
+		Longitude:   input.Longitude,
+		Phone:       input.Phone,
+		Website:     input.Website,
+		Images:      input.Images,
+		AverageRating: 0,
+		ReviewCount:   0,
+		IsActive:    true,
+		CreatedByID: userID,
+	}
+
+	if err := place.Validate(); err != nil {
+		return nil, err
+	}
+
+	return place, s.txManager.WithinTx(ctx, func(ctx context.Context, repos *domain.Repos) error {
+		repos.Place = s.placeRepo
+		return repos.Place.Create(ctx, place)
+	})
 }
 
 func (s *placeService) GetPlace(ctx context.Context, placeID uuid.UUID) (*domain.Place, error) {
-	panic("not implemented")
+	return s.placeRepo.GetByID(ctx, placeID)
 }
 
 func (s *placeService) UpdatePlace(ctx context.Context, placeID, userID uuid.UUID, input *domain.UpdatePlaceInput) (*domain.Place, error) {
-	panic("not implemented")
+	var updatedPlace *domain.Place
+
+	err := s.txManager.WithinTx(ctx, func(ctx context.Context, repos *domain.Repos) error {
+		repos.Place = s.placeRepo
+
+		// Get existing place
+		place, err := repos.Place.GetByID(ctx, placeID)
+		if err != nil {
+			return err
+		}
+
+		// Check if user is the author
+		if place.CreatedByID != userID {
+			return domain.ErrAccessDenied
+		}
+
+		// Apply updates
+		if input.Name != nil {
+			place.Name = *input.Name
+		}
+		if input.Description != nil {
+			place.Description = *input.Description
+		}
+		if input.Address != nil {
+			place.Address = *input.Address
+		}
+		if input.Latitude != nil {
+			place.Latitude = *input.Latitude
+		}
+		if input.Longitude != nil {
+			place.Longitude = *input.Longitude
+		}
+		if input.Phone != nil {
+			place.Phone = *input.Phone
+		}
+		if input.Website != nil {
+			place.Website = *input.Website
+		}
+		if input.Images != nil {
+			place.Images = *input.Images
+		}
+
+		// Validate updated place
+		if err := place.Validate(); err != nil {
+			return err
+		}
+
+		// Update in repository
+		if err := repos.Place.Update(ctx, place); err != nil {
+			return err
+		}
+
+		updatedPlace = place
+		return nil
+	})
+
+	return updatedPlace, err
 }
 
 func (s *placeService) DeletePlace(ctx context.Context, placeID, userID uuid.UUID) error {
-	panic("not implemented")
+	return s.txManager.WithinTx(ctx, func(ctx context.Context, repos *domain.Repos) error {
+		repos.Place = s.placeRepo
+
+		// Get existing place to check ownership
+		place, err := repos.Place.GetByID(ctx, placeID)
+		if err != nil {
+			return err
+		}
+
+		// Check if user is the author
+		if place.CreatedByID != userID {
+			return domain.ErrAccessDenied
+		}
+
+		return repos.Place.Delete(ctx, placeID)
+	})
 }
 
 func (s *placeService) SearchPlaces(ctx context.Context, params *domain.SearchPlacesParams) (*domain.PlacesResult, error) {
-	panic("not implemented")
+	places, total, err := s.placeRepo.Search(ctx, params.Query, params.Type, params.Limit, params.Offset)
+	if err != nil {
+		return nil, err
+	}
+
+	return &domain.PlacesResult{
+		Places: places,
+		Total:  total,
+		Limit:  params.Limit,
+		Offset: params.Offset,
+	}, nil
 }
 
 func (s *placeService) GetNearbyPlaces(ctx context.Context, params *domain.NearbyPlacesParams) ([]*domain.Place, error) {
-	panic("not implemented")
+	coords, err := domain.NewCoordinates(params.Latitude, params.Longitude)
+	if err != nil {
+		return nil, err
+	}
+
+	return s.placeRepo.GetNearby(ctx, coords, params.RadiusKm, params.Limit)
 }

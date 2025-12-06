@@ -193,11 +193,15 @@ func (p *placeRepository) Search(ctx context.Context, query string, placeType *d
 func (p *placeRepository) GetNearby(ctx context.Context, coords *domain.Coordinates, radiusKm float64, limit int) ([]*domain.Place, error) {
 	const q = `
 		SELECT id, name, description, type, address, latitude, longitude, phone, website, images,
-		       average_rating, review_count, is_active, created_by_id, created_at, updated_at,
-		       (6371 * acos(cos(radians($1)) * cos(radians(latitude)) * cos(radians(longitude) - radians($2)) + sin(radians($1)) * sin(radians(latitude)))) AS distance
-		FROM places
-		WHERE is_active = true
-		HAVING distance < $3
+		       average_rating, review_count, is_active, created_by_id, created_at, updated_at, distance
+		FROM (
+			SELECT id, name, description, type, address, latitude, longitude, phone, website, images,
+			       average_rating, review_count, is_active, created_by_id, created_at, updated_at,
+			       (6371 * acos(cos(radians($1)) * cos(radians(latitude)) * cos(radians(longitude) - radians($2)) + sin(radians($1)) * sin(radians(latitude)))) AS distance
+			FROM places
+			WHERE is_active = true
+		) AS places_with_distance
+		WHERE distance < $3
 		ORDER BY distance
 		LIMIT $4;
 	`
