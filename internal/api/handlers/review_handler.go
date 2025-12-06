@@ -157,7 +157,7 @@ func (h *ReviewHandler) DeleteReview(c *gin.Context) {
 }
 
 func (h *ReviewHandler) GetReviewsByPlace(c *gin.Context) {
-	placeIDStr := c.Param("place_id")
+	placeIDStr := c.Param("id")
 	placeID, err := uuid.Parse(placeIDStr)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, common.ErrorResponse{Error: "Invalid place ID"})

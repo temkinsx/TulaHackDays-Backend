@@ -10,8 +10,13 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-// NewRouter создаёт и настраивает Gin роутер со всеми HTTP-группами.
-func NewRouter(authMiddleware *middleware.AuthMiddleware, userHandler *handlers.UserHandler, placeHandler *handlers.PlaceHandler, reviewHandler *handlers.ReviewHandler) *gin.Engine {
+func NewRouter(
+	authMiddleware *middleware.AuthMiddleware,
+	userHandler *handlers.UserHandler,
+	achievementHandler *handlers.AchievementHandler,
+	placeHandler *handlers.PlaceHandler,
+	reviewHandler *handlers.ReviewHandler,
+) *gin.Engine {
 	router := gin.Default()
 
 	router.Use(cors.New(cors.Config{
@@ -30,6 +35,7 @@ func NewRouter(authMiddleware *middleware.AuthMiddleware, userHandler *handlers.
 	{
 		registerAuthRoutes(v1, userHandler)
 		registerUserRoutes(v1, authMiddleware, userHandler)
+		registerAchievementRoutes(v1, achievementHandler)
 		registerPlaceRoutes(v1, authMiddleware, placeHandler, reviewHandler)
 		registerReviewRoutes(v1, authMiddleware, reviewHandler)
 	}
@@ -59,7 +65,7 @@ func registerUserRoutes(v1 *gin.RouterGroup, authMiddleware *middleware.AuthMidd
 
 func registerAchievementRoutes(v1 *gin.RouterGroup, achievementHandler *handlers.AchievementHandler) {
 	achievement := v1.Group("/achievement")
-	achievement.GET("/", achievementHandler.ListActive)
+	achievement.GET("", achievementHandler.ListActive)
 }
 
 func registerPlaceRoutes(v1 *gin.RouterGroup, authMiddleware *middleware.AuthMiddleware, placeHandler *handlers.PlaceHandler, reviewHandler *handlers.ReviewHandler) {
@@ -67,7 +73,7 @@ func registerPlaceRoutes(v1 *gin.RouterGroup, authMiddleware *middleware.AuthMid
 	places.GET("/search", placeHandler.SearchPlaces)
 	places.GET("/nearby", placeHandler.GetNearbyPlaces)
 	places.GET("/:id", placeHandler.GetPlace)
-	places.GET("/:place_id/reviews", reviewHandler.GetReviewsByPlace)
+	places.GET("/:id/reviews", reviewHandler.GetReviewsByPlace)
 
 	protected := places.Group("")
 	protected.Use(authMiddleware.AuthRequired())
