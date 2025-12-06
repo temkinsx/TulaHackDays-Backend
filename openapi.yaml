@@ -1,0 +1,751 @@
+openapi: 3.0.3
+info:
+  title: Health Map API
+  version: 1.0.0
+  description: REST API для пользователей, мест и отзывов.
+servers:
+  - url: http://localhost:8080/api/v1
+
+components:
+  securitySchemes:
+    BearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+
+  schemas:
+    ErrorResponse:
+      type: object
+      properties:
+        error:
+          type: string
+    SuccessResponse:
+      type: object
+      properties:
+        message:
+          type: string
+
+    User:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        email:
+          type: string
+          format: email
+        username:
+          type: string
+        first_name:
+          type: string
+        last_name:
+          type: string
+        avatar:
+          type: string
+        points:
+          type: integer
+        level:
+          type: integer
+        is_active:
+          type: boolean
+        created_at:
+          type: string
+          format: date-time
+
+    LoginResponse:
+      type: object
+      properties:
+        token:
+          type: string
+        user:
+          $ref: '#/components/schemas/User'
+
+    RegisterRequest:
+      type: object
+      required: [email, username, password]
+      properties:
+        email:
+          type: string
+        username:
+          type: string
+        password:
+          type: string
+        first_name:
+          type: string
+        last_name:
+          type: string
+
+    LoginRequest:
+      type: object
+      required: [email, password]
+      properties:
+        email:
+          type: string
+        password:
+          type: string
+
+    UpdateProfileRequest:
+      type: object
+      properties:
+        first_name:
+          type: string
+        last_name:
+          type: string
+        avatar:
+          type: string
+
+    ChangePasswordRequest:
+      type: object
+      required: [old_password, new_password]
+      properties:
+        old_password:
+          type: string
+        new_password:
+          type: string
+
+    Place:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        name:
+          type: string
+        description:
+          type: string
+        type:
+          type: string
+          enum: [healthy_food, alcohol, tobacco, health]
+        address:
+          type: string
+        latitude:
+          type: number
+        longitude:
+          type: number
+        phone:
+          type: string
+        website:
+          type: string
+        images:
+          type: array
+          items:
+            type: string
+        average_rating:
+          type: number
+          format: double
+        review_count:
+          type: integer
+        is_active:
+          type: boolean
+        created_by_id:
+          type: string
+          format: uuid
+        created_at:
+          type: string
+          format: date-time
+
+    PlaceCreateRequest:
+      type: object
+      required: [name, type, address, latitude, longitude]
+      properties:
+        name: { type: string }
+        description: { type: string }
+        type: { type: string }
+        address: { type: string }
+        latitude: { type: number }
+        longitude: { type: number }
+        phone: { type: string }
+        website: { type: string }
+        images:
+          type: array
+          items:
+            type: string
+
+    PlaceUpdateRequest:
+      type: object
+      properties:
+        name: { type: string }
+        description: { type: string }
+        address: { type: string }
+        latitude: { type: number }
+        longitude: { type: number }
+        phone: { type: string }
+        website: { type: string }
+        images:
+          type: array
+          items:
+            type: string
+
+    PlacesResponse:
+      type: object
+      properties:
+        places:
+          type: array
+          items:
+            $ref: '#/components/schemas/Place'
+        total:
+          type: integer
+        limit:
+          type: integer
+        offset:
+          type: integer
+
+    Review:
+      type: object
+      properties:
+        id:
+          type: integer
+        place_id:
+          type: string
+          format: uuid
+        user_id:
+          type: string
+          format: uuid
+        title:
+          type: string
+        content:
+          type: string
+        images:
+          type: array
+          items:
+            type: string
+        rating:
+          type: number
+        is_active:
+          type: boolean
+        created_at:
+          type: string
+          format: date-time
+
+    ReviewCreateRequest:
+      type: object
+      required: [place_id, content, rating, cleanliness, service, quality, value]
+      properties:
+        place_id:
+          type: string
+        title:
+          type: string
+        content:
+          type: string
+        rating:
+          type: number
+        images:
+          type: array
+          items:
+            type: string
+        cleanliness:
+          type: number
+        service:
+          type: number
+        quality:
+          type: number
+        value:
+          type: number
+
+    ReviewUpdateRequest:
+      type: object
+      properties:
+        title: { type: string }
+        content: { type: string }
+        rating: { type: number }
+        images:
+          type: array
+          items:
+            type: string
+        cleanliness: { type: number }
+        service: { type: number }
+        quality: { type: number }
+        value: { type: number }
+
+    ReviewsResponse:
+      type: object
+      properties:
+        reviews:
+          type: array
+          items:
+            $ref: '#/components/schemas/Review'
+        total: { type: integer }
+        limit: { type: integer }
+        offset: { type: integer }
+
+    Comment:
+      type: object
+      properties:
+        id: { type: integer }
+        review_id: { type: integer }
+        user_id:
+          type: string
+          format: uuid
+        content: { type: string }
+        is_active: { type: boolean }
+        created_at:
+          type: string
+          format: date-time
+
+    CommentRequest:
+      type: object
+      required: [content]
+      properties:
+        content:
+          type: string
+
+    CommentsResponse:
+      type: object
+      properties:
+        comments:
+          type: array
+          items:
+            $ref: '#/components/schemas/Comment'
+        total: { type: integer }
+        limit: { type: integer }
+        offset: { type: integer }
+
+paths:
+  /health:
+    get:
+      summary: Health check
+      responses:
+        '200':
+          description: OK
+
+  /auth/register:
+    post:
+      summary: Register
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RegisterRequest'
+      responses:
+        '201':
+          description: Created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/LoginResponse'
+        '400':
+          description: Validation error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /auth/login:
+    post:
+      summary: Login
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/LoginRequest'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/LoginResponse'
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /users/leaderboard:
+    get:
+      summary: Users leaderboard
+      parameters:
+        - in: query
+          name: limit
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 100
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/User'
+
+  /users/profile:
+    get:
+      security: [{ BearerAuth: [] }]
+      summary: Get profile
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+    put:
+      security: [{ BearerAuth: [] }]
+      summary: Update profile
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateProfileRequest'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
+
+  /users/change-password:
+    post:
+      security: [{ BearerAuth: [] }]
+      summary: Change password
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ChangePasswordRequest'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SuccessResponse'
+
+  /users/achievements:
+    get:
+      security: [{ BearerAuth: [] }]
+      summary: Get achievements
+      responses:
+        '200':
+          description: OK
+
+  /places/search:
+    get:
+      summary: Search places
+      parameters:
+        - in: query
+          name: query
+          schema:
+            type: string
+        - in: query
+          name: type
+          schema:
+            type: string
+        - in: query
+          name: lat
+          schema:
+            type: number
+        - in: query
+          name: lng
+          schema:
+            type: number
+        - in: query
+          name: radius
+          schema:
+            type: number
+        - in: query
+          name: limit
+          schema:
+            type: integer
+        - in: query
+          name: offset
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PlacesResponse'
+
+  /places/nearby:
+    get:
+      summary: Nearby places
+      parameters:
+        - name: lat
+          in: query
+          required: true
+          schema:
+            type: number
+        - name: lng
+          in: query
+          required: true
+          schema:
+            type: number
+        - name: radius
+          in: query
+          schema:
+            type: number
+        - name: limit
+          in: query
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Place'
+
+  /places/{id}:
+    get:
+      summary: Get place by ID
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Place'
+    put:
+      security: [{ BearerAuth: [] }]
+      summary: Update place
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PlaceUpdateRequest'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Place'
+    delete:
+      security: [{ BearerAuth: [] }]
+      summary: Delete place
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SuccessResponse'
+
+  /places:
+    post:
+      security: [{ BearerAuth: [] }]
+      summary: Create place
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PlaceCreateRequest'
+      responses:
+        '201':
+          description: Created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Place'
+
+  /places/{place_id}/reviews:
+    get:
+      summary: Reviews for place
+      parameters:
+        - in: path
+          name: place_id
+          required: true
+          schema:
+            type: string
+        - in: query
+          name: limit
+          schema:
+            type: integer
+        - in: query
+          name: offset
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ReviewsResponse'
+
+  /reviews:
+    post:
+      security: [{ BearerAuth: [] }]
+      summary: Create review
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ReviewCreateRequest'
+      responses:
+        '201':
+          description: Created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Review'
+
+  /reviews/{id}:
+    get:
+      summary: Get review
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Review'
+    put:
+      security: [{ BearerAuth: [] }]
+      summary: Update review
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ReviewUpdateRequest'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Review'
+    delete:
+      security: [{ BearerAuth: [] }]
+      summary: Delete review
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SuccessResponse'
+
+  /reviews/{id}/comments:
+    get:
+      summary: Comments for review
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+        - name: limit
+          in: query
+          schema:
+            type: integer
+        - name: offset
+          in: query
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CommentsResponse'
+    post:
+      security: [{ BearerAuth: [] }]
+      summary: Add comment to review
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CommentRequest'
+      responses:
+        '201':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Comment'
+
+  /users/{user_id}/reviews:
+    get:
+      summary: Reviews by user
+      parameters:
+        - name: user_id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+        - name: limit
+          in: query
+          schema:
+            type: integer
+        - name: offset
+          in: query
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ReviewsResponse'
