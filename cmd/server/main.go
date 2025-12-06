@@ -40,13 +40,14 @@ func main() {
 	reviewSvc := services.NewReviewService(reviewRepo, txManager)
 
 	userHandler := handlers.NewUserHandler(userSvc, achievementSvc)
+	achievementHandler := handlers.NewAchievementHandler(achievementSvc)
 	placeHandler := handlers.NewPlaceHandler(placeSvc)
 	reviewHandler := handlers.NewReviewHandler(reviewSvc)
 
 	authMiddleware := middleware.NewAuthMiddleware(authService)
 
 	gin.SetMode(gin.ReleaseMode)
-	router := api.NewRouter(authMiddleware, userHandler, placeHandler, reviewHandler)
+	router := api.NewRouter(authMiddleware, userHandler, achievementHandler, placeHandler, reviewHandler)
 
 	// Start server
 	serverAddr := os.Getenv("SERVER_HOST") + ":" + os.Getenv("SERVER_PORT")

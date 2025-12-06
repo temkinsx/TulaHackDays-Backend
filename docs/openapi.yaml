@@ -499,7 +499,7 @@ paths:
         default:
           $ref: '#/components/responses/ErrorResponse'
 
-  /achievement:
+  /achievements:
     get:
       summary: List active achievements
       responses:

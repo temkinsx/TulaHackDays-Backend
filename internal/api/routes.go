@@ -64,7 +64,7 @@ func registerUserRoutes(v1 *gin.RouterGroup, authMiddleware *middleware.AuthMidd
 }
 
 func registerAchievementRoutes(v1 *gin.RouterGroup, achievementHandler *handlers.AchievementHandler) {
-	achievement := v1.Group("/achievement")
+	achievement := v1.Group("/achievements")
 	achievement.GET("", achievementHandler.ListActive)
 }
 
