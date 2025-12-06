@@ -109,6 +109,28 @@ components:
           type: string
         new_password:
           type: string
+    Achievement:
+      type: object
+      properties:
+        id:
+          type: integer
+        name:
+          type: string
+        description:
+          type: string
+        icon:
+          type: string
+        points:
+          type: integer
+        type:
+          type: string
+        condition:
+          type: string
+        is_active:
+          type: boolean
+        created_at:
+          type: string
+          format: date-time
     UserAchievement:
       type: object
       properties:
@@ -390,6 +412,7 @@ paths:
             type: integer
             minimum: 1
             maximum: 100
+          description: Сколько лидеров вернуть (1-100, по умолчанию 10)
       responses:
         '200':
           description: OK
@@ -476,6 +499,21 @@ paths:
         default:
           $ref: '#/components/responses/ErrorResponse'
 
+  /achievements:
+    get:
+      summary: List active achievements
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Achievement'
+        default:
+          $ref: '#/components/responses/ErrorResponse'
+
   /places/search:
     get:
       summary: Search places
@@ -484,30 +522,37 @@ paths:
           name: query
           schema:
             type: string
+          description: Поисковая строка для названия или описания места
         - in: query
           name: type
           schema:
             type: string
+          description: Тип места для фильтрации (healthy_food, alcohol, tobacco, health)
         - in: query
           name: lat
           schema:
             type: number
+          description: Широта центра поиска (опционально, для геофильтра)
         - in: query
           name: lng
           schema:
             type: number
+          description: Долгота центра поиска (опционально, для геофильтра)
         - in: query
           name: radius
           schema:
             type: number
+          description: Радиус поиска в километрах, используется вместе с lat/lng
         - in: query
           name: limit
           schema:
             type: integer
+          description: Размер страницы результатов (по умолчанию 20, максимум 100)
         - in: query
           name: offset
           schema:
             type: integer
+          description: Смещение для пагинации (количество записей, которые нужно пропустить)
       responses:
         '200':
           description: OK
@@ -527,19 +572,23 @@ paths:
           required: true
           schema:
             type: number
+          description: Широта текущей позиции пользователя
         - name: lng
           in: query
           required: true
           schema:
             type: number
+          description: Долгота текущей позиции пользователя
         - name: radius
           in: query
           schema:
             type: number
+          description: Радиус поиска в километрах (по умолчанию 5 км)
         - name: limit
           in: query
           schema:
             type: integer
+          description: Максимальное количество мест в ответе (1-100, по умолчанию 20)
       responses:
         '200':
           description: OK
@@ -561,6 +610,7 @@ paths:
           required: true
           schema:
             type: string
+          description: UUID места
       responses:
         '200':
           description: OK
@@ -579,6 +629,7 @@ paths:
           required: true
           schema:
             type: string
+          description: UUID редактируемого места
       requestBody:
         required: true
         content:
@@ -603,6 +654,7 @@ paths:
           required: true
           schema:
             type: string
+          description: UUID удаляемого места
       responses:
         '200':
           description: OK
@@ -642,14 +694,17 @@ paths:
           required: true
           schema:
             type: string
+          description: UUID места, для которого запрашиваются отзывы
         - in: query
           name: limit
           schema:
             type: integer
+          description: Размер страницы отзывов (по умолчанию 20, максимум 100)
         - in: query
           name: offset
           schema:
             type: integer
+          description: Смещение для пагинации списка отзывов
       responses:
         '200':
           description: OK
@@ -689,6 +744,7 @@ paths:
           required: true
           schema:
             type: integer
+          description: Идентификатор отзыва
       responses:
         '200':
           description: OK
@@ -707,6 +763,7 @@ paths:
           required: true
           schema:
             type: integer
+          description: Идентификатор редактируемого отзыва
       requestBody:
         required: true
         content:
@@ -731,6 +788,7 @@ paths:
           required: true
           schema:
             type: integer
+          description: Идентификатор удаляемого отзыва
       responses:
         '200':
           description: OK
@@ -750,14 +808,17 @@ paths:
           required: true
           schema:
             type: integer
+          description: Идентификатор отзыва
         - name: limit
           in: query
           schema:
             type: integer
+          description: Максимум комментариев в ответе (по умолчанию 20)
         - name: offset
           in: query
           schema:
             type: integer
+          description: Смещение для пагинации комментариев
       responses:
         '200':
           description: OK
@@ -776,6 +837,7 @@ paths:
           required: true
           schema:
             type: integer
+          description: Идентификатор отзыва, к которому добавляется комментарий
       requestBody:
         required: true
         content:
@@ -802,14 +864,17 @@ paths:
           schema:
             type: string
             format: uuid
+          description: UUID пользователя, чьи отзывы запрашиваются
         - name: limit
           in: query
           schema:
             type: integer
+          description: Размер страницы (по умолчанию 20, максимум 100)
         - name: offset
           in: query
           schema:
             type: integer
+          description: Смещение для пагинации
       responses:
         '200':
           description: OK

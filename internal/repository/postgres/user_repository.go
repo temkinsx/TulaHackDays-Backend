@@ -198,6 +198,25 @@ func (u *userRepository) Update(ctx context.Context, user *domain.User) (*domain
 	return &usr, err
 }
 
+func (u *userRepository) AddPoints(ctx context.Context, userID uuid.UUID, points int) (int, error) {
+	const q = `
+		UPDATE users
+		SET points = points + $2
+		WHERE id = $1
+		RETURNING points;
+	`
+
+	var total int
+	err := u.q.QueryRow(ctx, q, userID, points).Scan(&total)
+	if err != nil {
+		if errors.Is(err, pgx.ErrNoRows) {
+			return -1, domain.ErrUserNotFound
+		}
+	}
+
+	return points, nil
+}
+
 func (u *userRepository) Delete(ctx context.Context, id uuid.UUID) error {
 	const q = `
 		DELETE

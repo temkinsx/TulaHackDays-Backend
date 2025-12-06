@@ -1,0 +1,6 @@
+.gomodcache
+.idea
+.git
+Dockerfile
+docker-compose.yml
+*.log

@@ -64,7 +64,7 @@ func (r *achievementRepository) GetByID(ctx context.Context, id uint) (*domain.A
 	return &achievement, nil
 }
 
-func (r *achievementRepository) ListAllActive(ctx context.Context) ([]*domain.Achievement, error) {
+func (r *achievementRepository) ListActive(ctx context.Context) ([]*domain.Achievement, error) {
 	const query = `
 		SELECT id, name, description, icon, points, type, condition, is_active, created_at
 		FROM achievements

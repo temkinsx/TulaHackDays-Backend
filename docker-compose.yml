@@ -1,0 +1,30 @@
+version: "3.9"
+
+services:
+  db:
+    image: postgres:16
+    restart: always
+    environment:
+      POSTGRES_USER: health
+      POSTGRES_PASSWORD: health
+      POSTGRES_DB: health_map
+    volumes:
+      - db_data:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+
+  api:
+    build: .
+    depends_on:
+      - db
+    restart: unless-stopped
+    environment:
+      POSTGRES_DSN: postgres://health:health@db:5432/health_map?sslmode=disable
+      JWT_SECRET: supersecret
+      SERVER_HOST: 0.0.0.0
+      SERVER_PORT: 8080
+    ports:
+      - "8080:8080"
+
+volumes:
+  db_data:
