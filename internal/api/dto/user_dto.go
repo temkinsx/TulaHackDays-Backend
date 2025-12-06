@@ -12,7 +12,7 @@ type UserDTO struct {
 	Username  string    `json:"username"`
 	FirstName string    `json:"first_name"`
 	LastName  string    `json:"last_name"`
-	Avatar    string    `json:"avatar"`
+	Avatar    []byte    `json:"avatar"`
 	Points    int       `json:"points"`
 	Level     int       `json:"level"`
 	IsActive  bool      `json:"is_active"`
@@ -40,7 +40,7 @@ type LoginUserResponseDTO struct {
 type UpdateProfileRequestDTO struct {
 	FirstName string `json:"first_name"`
 	LastName  string `json:"last_name"`
-	Avatar    string `json:"avatar"`
+	Avatar    []byte `json:"avatar"`
 }
 
 type ChangePasswordRequestDTO struct {
